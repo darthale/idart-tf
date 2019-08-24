@@ -19,7 +19,7 @@ resource "aws_cloudfront_distribution" "idarth-cloudfront-distr" {
     prefix          = "myprefix"
   }*/
 
-  aliases = ["${var.domain_name}", "www.${var.domain_name}"]
+  aliases = ["${var.domain_name}", "${var.domain_name_www}"]
 
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD"]
@@ -46,18 +46,19 @@ resource "aws_cloudfront_distribution" "idarth-cloudfront-distr" {
 
   restrictions {
     geo_restriction {
-      restriction_type = "whitelist"
-      locations        = ["US", "CA", "GB", "DE"]
+      restriction_type = "none"
+      locations        = []
     }
   }
 
   viewer_certificate {
     cloudfront_default_certificate = true
+    acm_certificate_arn = "${aws_acm_certificate.idarth-ssl-certificate.acm_certificate_arn}"
   }
 
 
     tags = {
         Project = "${var.name}-${var.env}"
         Scope    = "personal-blog"
-  }
+    }
 }
