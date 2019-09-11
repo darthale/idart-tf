@@ -6,7 +6,7 @@ resource "aws_s3_bucket" "idarth-static-site-host" {
   server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {
-        sse_algorithm = "aws:kms"
+        sse_algorithm = "AES256"
       }
     }
   }
@@ -17,10 +17,10 @@ resource "aws_s3_bucket" "idarth-static-site-host" {
   }
 
   cors_rule {
-    AllowedOrigin = ["*"]
-    AllowedMethod = ["GET", "HEAD"]
-    AllowedHeader = ["Authorization", "Content-Length"]
-    MaxAgeSeconds = 3000 
+    allowed_origins = ["*"]
+    allowed_methods = ["GET", "HEAD"]
+    allowed_headers = ["Authorization", "Content-Length"]
+    max_age_seconds = 3000 
 
   }
 

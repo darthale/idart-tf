@@ -1,8 +1,20 @@
+provider "aws" {
+  alias           = "us_east_1"
+  region          = "us-east-1"
+}
+
+data "aws_acm_certificate" "idarth-ssl-certificate" {
+  provider        = "aws.us_east_1"
+  domain  = "${var.domain_name}"
+  statuses = ["ISSUED"]
+}
+
+
 resource "aws_cloudfront_distribution" "idarth-cloudfront-distr" {
     
   origin {
     domain_name = "${aws_s3_bucket.idarth-static-site-host.bucket_regional_domain_name}"
-    origin_id   = "${local.s3_origin_id}"
+    origin_id   = "${var.domain_name}"
     
     /*s3_origin_config {
       origin_access_identity = "origin-access-identity/cloudfront/ABCDEFG1234567"
@@ -24,7 +36,7 @@ resource "aws_cloudfront_distribution" "idarth-cloudfront-distr" {
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD"]
     cached_methods   = ["GET", "HEAD"]
-    target_origin_id = "${local.s3_origin_id}"
+    target_origin_id = "${var.domain_name}"
 
     forwarded_values {
       query_string = false
@@ -51,9 +63,17 @@ resource "aws_cloudfront_distribution" "idarth-cloudfront-distr" {
     }
   }
 
+  custom_error_response {
+    error_caching_min_ttl = 300
+    error_code = 403
+    response_code = 404
+    response_page_path = "/404.html"
+  }
+
   viewer_certificate {
-    cloudfront_default_certificate = true
-    acm_certificate_arn = "${aws_acm_certificate.idarth-ssl-certificate.acm_certificate_arn}"
+    
+    acm_certificate_arn  = "${data.aws_acm_certificate.idarth-ssl-certificate.arn}"
+    ssl_support_method  = "sni-only"
   }
 
 
